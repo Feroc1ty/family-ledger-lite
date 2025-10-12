@@ -5,7 +5,7 @@ export interface FamilyMember {
   startMonth?: string;
 }
 
-export type ExpenseType = "monthly" | "quarterly" | "yearly" | "custom";
+export type ExpenseType = "daily" | "weekly" | "monthly" | "quarterly" | "yearly" | "custom";
 
 export type ExpenseCategory = 
   | "Еда" 

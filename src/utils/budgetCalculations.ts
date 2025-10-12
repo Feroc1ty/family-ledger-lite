@@ -28,8 +28,15 @@ export const calculateTotalIncome = (
 
 export const calculateMonthlyExpenses = (expenses: Expense[]): number => {
   return expenses
-    .filter(expense => expense.type === "monthly")
-    .reduce((total, expense) => total + expense.amount, 0);
+    .filter(expense => expense.type === "monthly" || expense.type === "daily" || expense.type === "weekly")
+    .reduce((total, expense) => {
+      if (expense.type === "daily") {
+        return total + (expense.amount * 30.44); // Average days per month
+      } else if (expense.type === "weekly") {
+        return total + (expense.amount * 4.33); // Average weeks per month
+      }
+      return total + expense.amount;
+    }, 0);
 };
 
 export const calculatePlannedExpenses = (

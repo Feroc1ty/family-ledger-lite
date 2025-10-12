@@ -34,6 +34,8 @@ import { ExpenseType, ExpenseCategory } from "@/types/budget";
 import { toast } from "sonner";
 
 const EXPENSE_TYPES: { value: ExpenseType; label: string }[] = [
+  { value: "daily", label: "Ежедневный" },
+  { value: "weekly", label: "Еженедельный" },
   { value: "monthly", label: "Ежемесячный" },
   { value: "quarterly", label: "Раз в 3 месяца" },
   { value: "yearly", label: "Раз в год" },
@@ -64,8 +66,15 @@ const Expenses = () => {
   });
 
   const totalMonthly = expenses
-    .filter((e) => e.type === "monthly")
-    .reduce((sum, e) => sum + e.amount, 0);
+    .filter((e) => e.type === "monthly" || e.type === "daily" || e.type === "weekly")
+    .reduce((sum, e) => {
+      if (e.type === "daily") {
+        return sum + (e.amount * 30.44);
+      } else if (e.type === "weekly") {
+        return sum + (e.amount * 4.33);
+      }
+      return sum + e.amount;
+    }, 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
