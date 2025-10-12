@@ -52,6 +52,16 @@ const CATEGORIES: ExpenseCategory[] = [
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => getMonthName(i));
 
+const DAYS_OF_WEEK = [
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+  "Воскресенье",
+];
+
 const Expenses = () => {
   const { expenses, addExpense, updateExpense, deleteExpense } = useBudgetData();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,6 +73,7 @@ const Expenses = () => {
     type: "monthly" as ExpenseType,
     dueMonth: getMonthName(new Date().getMonth()),
     startMonth: getMonthName(new Date().getMonth()),
+    dayOfWeek: "Понедельник",
   });
 
   const totalMonthly = expenses
@@ -90,7 +101,8 @@ const Expenses = () => {
       category: formData.category,
       type: formData.type,
       startMonth: formData.startMonth,
-      ...(formData.type !== "monthly" && { dueMonth: formData.dueMonth }),
+      ...(formData.type !== "monthly" && formData.type !== "daily" && formData.type !== "weekly" && { dueMonth: formData.dueMonth }),
+      ...(formData.type === "weekly" && { dayOfWeek: formData.dayOfWeek }),
     };
 
     if (editingId) {
@@ -108,6 +120,7 @@ const Expenses = () => {
       type: "monthly",
       dueMonth: getMonthName(new Date().getMonth()),
       startMonth: getMonthName(new Date().getMonth()),
+      dayOfWeek: "Понедельник",
     });
     setEditingId(null);
     setIsDialogOpen(false);
@@ -122,6 +135,7 @@ const Expenses = () => {
       type: expense.type,
       dueMonth: expense.dueMonth || getMonthName(new Date().getMonth()),
       startMonth: expense.startMonth,
+      dayOfWeek: expense.dayOfWeek || "Понедельник",
     });
     setIsDialogOpen(true);
   };
@@ -156,6 +170,7 @@ const Expenses = () => {
                   type: "monthly",
                   dueMonth: getMonthName(new Date().getMonth()),
                   startMonth: getMonthName(new Date().getMonth()),
+                  dayOfWeek: "Понедельник",
                 });
               }}
             >
@@ -237,7 +252,29 @@ const Expenses = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                {formData.type !== "monthly" && (
+                {formData.type === "weekly" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="dayOfWeek">День недели</Label>
+                    <Select
+                      value={formData.dayOfWeek}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, dayOfWeek: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DAYS_OF_WEEK.map((day) => (
+                          <SelectItem key={day} value={day}>
+                            {day}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {formData.type !== "monthly" && formData.type !== "daily" && formData.type !== "weekly" && (
                   <div className="space-y-2">
                     <Label htmlFor="dueMonth">Месяц платежа</Label>
                     <Select

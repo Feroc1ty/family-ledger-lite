@@ -23,6 +23,7 @@ export interface Expense {
   dueMonth?: string;
   startMonth: string;
   customPeriodMonths?: number;
+  dayOfWeek?: string;
 }
 
 export interface BudgetMonth {
