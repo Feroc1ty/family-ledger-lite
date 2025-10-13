@@ -192,14 +192,14 @@ const Expenses = () => {
     return EXPENSE_TYPES.find((t) => t.value === type)?.label || type;
   };
 
-  const getCategoryBackgroundColor = (category: ExpenseCategory) => {
+  const getCategoryBorderColor = (category: ExpenseCategory) => {
     const colors: Record<string, string> = {
-      "Еда": "bg-blue-50 dark:bg-blue-950/30",
-      "Авто": "bg-purple-50 dark:bg-purple-950/30",
-      "Коммунальные": "bg-green-50 dark:bg-green-950/30",
-      "Развлечения": "bg-pink-50 dark:bg-pink-950/30",
-      "Подарки": "bg-orange-50 dark:bg-orange-950/30",
-      "Прочее": "bg-gray-50 dark:bg-gray-900/30",
+      "Еда": "border-l-4 border-blue-500 hover:border-blue-600 dark:border-blue-400 dark:hover:border-blue-300",
+      "Авто": "border-l-4 border-purple-500 hover:border-purple-600 dark:border-purple-400 dark:hover:border-purple-300",
+      "Коммунальные": "border-l-4 border-green-500 hover:border-green-600 dark:border-green-400 dark:hover:border-green-300",
+      "Развлечения": "border-l-4 border-pink-500 hover:border-pink-600 dark:border-pink-400 dark:hover:border-pink-300",
+      "Подарки": "border-l-4 border-orange-500 hover:border-orange-600 dark:border-orange-400 dark:hover:border-orange-300",
+      "Прочее": "border-l-4 border-gray-400 hover:border-gray-500 dark:border-gray-500 dark:hover:border-gray-400",
     };
     return colors[category] || colors["Прочее"];
   };
@@ -465,8 +465,11 @@ const Expenses = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredAndSortedExpenses.map((expense) => (
-                      <TableRow key={expense.id} className={getCategoryBackgroundColor(expense.category)}>
-                        <TableCell className="font-medium">
+                      <TableRow 
+                        key={expense.id} 
+                        className={`rounded-lg border border-border/40 transition-all duration-200 mb-2 ${getCategoryBorderColor(expense.category)}`}
+                      >
+                        <TableCell className="font-medium rounded-l-lg">
                           {expense.title}
                         </TableCell>
                         <TableCell>{expense.category}</TableCell>
