@@ -76,6 +76,11 @@ const Expenses = () => {
     dayOfWeek: "Понедельник",
   });
 
+  const [filterCategory, setFilterCategory] = useState<ExpenseCategory | "Все">("Все");
+  const [filterType, setFilterType] = useState<ExpenseType | "all">("all");
+  const [sortField, setSortField] = useState<"category" | "type" | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
   const totalMonthly = expenses
     .filter((e) => e.type === "monthly" || e.type === "daily" || e.type === "weekly")
     .reduce((sum, e) => {
@@ -86,6 +91,43 @@ const Expenses = () => {
       }
       return sum + e.amount;
     }, 0);
+
+  const totalYearly = expenses
+    .filter((e) => e.type === "yearly")
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const filteredAndSortedExpenses = expenses
+    .filter((expense) => {
+      if (filterCategory !== "Все" && expense.category !== filterCategory) {
+        return false;
+      }
+      if (filterType !== "all" && expense.type !== filterType) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      
+      const multiplier = sortDirection === "asc" ? 1 : -1;
+      
+      if (sortField === "category") {
+        return a.category.localeCompare(b.category) * multiplier;
+      } else if (sortField === "type") {
+        return a.type.localeCompare(b.type) * multiplier;
+      }
+      
+      return 0;
+    });
+
+  const handleSort = (field: "category" | "type") => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -309,13 +351,67 @@ const Expenses = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Все расходы</CardTitle>
+          <div className="flex flex-col gap-4">
+            <CardTitle>Все расходы</CardTitle>
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="filterCategory" className="text-sm mb-2 block">
+                  Фильтр по категории
+                </Label>
+                <Select
+                  value={filterCategory}
+                  onValueChange={(value) => setFilterCategory(value as ExpenseCategory | "Все")}
+                >
+                  <SelectTrigger id="filterCategory">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Все">Все категории</SelectItem>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="filterType" className="text-sm mb-2 block">
+                  Фильтр по типу
+                </Label>
+                <Select
+                  value={filterType}
+                  onValueChange={(value) => setFilterType(value as ExpenseType | "all")}
+                >
+                  <SelectTrigger id="filterType">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все типы</SelectItem>
+                    {EXPENSE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {expenses.length === 0 ? (
+          {filteredAndSortedExpenses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>Нет расходов</p>
-              <p className="text-sm mt-1">Добавьте первый расход</p>
+              <p>
+                {expenses.length === 0 
+                  ? "Нет расходов" 
+                  : "Нет расходов, соответствующих фильтрам"}
+              </p>
+              <p className="text-sm mt-1">
+                {expenses.length === 0 
+                  ? "Добавьте первый расход" 
+                  : "Попробуйте изменить фильтры"}
+              </p>
             </div>
           ) : (
             <>
@@ -324,14 +420,38 @@ const Expenses = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Название</TableHead>
-                      <TableHead>Категория</TableHead>
-                      <TableHead>Тип</TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-secondary/50"
+                        onClick={() => handleSort("category")}
+                      >
+                        <div className="flex items-center gap-1">
+                          Категория
+                          {sortField === "category" && (
+                            <span className="text-xs">
+                              {sortDirection === "asc" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </div>
+                      </TableHead>
+                      <TableHead 
+                        className="cursor-pointer hover:bg-secondary/50"
+                        onClick={() => handleSort("type")}
+                      >
+                        <div className="flex items-center gap-1">
+                          Тип
+                          {sortField === "type" && (
+                            <span className="text-xs">
+                              {sortDirection === "asc" ? "↑" : "↓"}
+                            </span>
+                          )}
+                        </div>
+                      </TableHead>
                       <TableHead className="text-right">Сумма</TableHead>
                       <TableHead className="text-right">Действия</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {expenses.map((expense) => (
+                    {filteredAndSortedExpenses.map((expense) => (
                       <TableRow key={expense.id}>
                         <TableCell className="font-medium">
                           {expense.title}
@@ -364,11 +484,17 @@ const Expenses = () => {
                   </TableBody>
                 </Table>
               </div>
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 pt-4 border-t space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold">Ежемесячные расходы:</span>
                   <span className="text-2xl font-bold text-destructive">
                     {formatCurrency(totalMonthly)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold">Ежегодные расходы:</span>
+                  <span className="text-2xl font-bold text-warning">
+                    {formatCurrency(totalYearly)}
                   </span>
                 </div>
               </div>

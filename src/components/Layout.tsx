@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Receipt, Calendar, PiggyBank } from "lucide-react";
+import { Home, Users, Receipt, CalendarDays, Calendar, PiggyBank } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LayoutProps {
@@ -14,6 +14,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: "/", label: "Главная", icon: Home },
     { path: "/family", label: "Семья", icon: Users },
     { path: "/expenses", label: "Расходы", icon: Receipt },
+    { path: "/expense-calendar", label: "Календарь", icon: CalendarDays },
     { path: "/planning", label: "Планирование", icon: Calendar },
     { path: "/savings", label: "Накопления", icon: PiggyBank },
   ];

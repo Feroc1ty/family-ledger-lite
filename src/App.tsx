@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Family from "./pages/Family";
 import Expenses from "./pages/Expenses";
+import ExpenseCalendar from "./pages/ExpenseCalendar";
 import Planning from "./pages/Planning";
 import Savings from "./pages/Savings";
 import NotFound from "./pages/NotFound";
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/family" element={<Family />} />
             <Route path="/expenses" element={<Expenses />} />
+            <Route path="/expense-calendar" element={<ExpenseCalendar />} />
             <Route path="/planning" element={<Planning />} />
             <Route path="/savings" element={<Savings />} />
             <Route path="*" element={<NotFound />} />
