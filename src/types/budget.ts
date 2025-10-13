@@ -12,7 +12,17 @@ export type ExpenseCategory =
   | "Авто" 
   | "Коммунальные" 
   | "Развлечения" 
+  | "Подарки"
   | "Прочее";
+
+export interface SavingsGoal {
+  id: string;
+  title: string;
+  targetAmount?: number;
+  monthlySaving?: number;
+  targetDate?: string;
+  currentAmount: number;
+}
 
 export interface Expense {
   id: string;
