@@ -65,11 +65,15 @@ const Savings = () => {
           );
           if (monthsToTarget > 0) {
             calculatedMonthlySaving = remaining / monthsToTarget;
-            projectedTotal = goal.currentAmount + (calculatedMonthlySaving * monthsToTarget);
           }
         } else if (goal.monthlySaving) {
           monthsToTarget = Math.ceil(remaining / goal.monthlySaving);
         }
+      }
+
+      // Расчёт итоговой накопленной суммы к целевой дате
+      if (goal.targetDate && monthsToTarget > 0) {
+        projectedTotal = goal.currentAmount + (calculatedMonthlySaving * monthsToTarget);
       }
 
       return {
