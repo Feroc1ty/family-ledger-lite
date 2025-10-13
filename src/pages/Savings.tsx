@@ -53,6 +53,7 @@ const Savings = () => {
       let calculatedMonthlySaving = goal.monthlySaving || 0;
       let monthsToTarget = 0;
       let progressPercent = 0;
+      let projectedTotal = 0;
 
       if (goal.targetAmount) {
         const remaining = goal.targetAmount - goal.currentAmount;
@@ -64,6 +65,7 @@ const Savings = () => {
           );
           if (monthsToTarget > 0) {
             calculatedMonthlySaving = remaining / monthsToTarget;
+            projectedTotal = goal.currentAmount + (calculatedMonthlySaving * monthsToTarget);
           }
         } else if (goal.monthlySaving) {
           monthsToTarget = Math.ceil(remaining / goal.monthlySaving);
@@ -75,6 +77,7 @@ const Savings = () => {
         calculatedMonthlySaving,
         monthsToTarget,
         progressPercent,
+        projectedTotal,
       };
     });
   }, [savingsGoals]);
@@ -327,6 +330,7 @@ const Savings = () => {
                     <TableHead className="text-right">Откладывать ежемесячно</TableHead>
                     <TableHead className="text-right">Осталось месяцев</TableHead>
                     <TableHead className="text-right">Целевая дата</TableHead>
+                    <TableHead className="text-right">Будет накоплено</TableHead>
                     <TableHead className="text-right">Действия</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -353,6 +357,9 @@ const Savings = () => {
                         {goal.targetDate
                           ? new Date(goal.targetDate).toLocaleDateString("ru-RU")
                           : "—"}
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-green-600">
+                        {goal.projectedTotal > 0 ? formatCurrency(goal.projectedTotal) : "—"}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
