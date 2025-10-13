@@ -47,6 +47,7 @@ const CATEGORIES: ExpenseCategory[] = [
   "Авто",
   "Коммунальные",
   "Развлечения",
+  "Подарки",
   "Прочее",
 ];
 
@@ -189,6 +190,18 @@ const Expenses = () => {
 
   const getTypeLabel = (type: ExpenseType) => {
     return EXPENSE_TYPES.find((t) => t.value === type)?.label || type;
+  };
+
+  const getCategoryBackgroundColor = (category: ExpenseCategory) => {
+    const colors: Record<string, string> = {
+      "Еда": "bg-blue-50 dark:bg-blue-950/30",
+      "Авто": "bg-purple-50 dark:bg-purple-950/30",
+      "Коммунальные": "bg-green-50 dark:bg-green-950/30",
+      "Развлечения": "bg-pink-50 dark:bg-pink-950/30",
+      "Подарки": "bg-orange-50 dark:bg-orange-950/30",
+      "Прочее": "bg-gray-50 dark:bg-gray-900/30",
+    };
+    return colors[category] || colors["Прочее"];
   };
 
   return (
@@ -452,7 +465,7 @@ const Expenses = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredAndSortedExpenses.map((expense) => (
-                      <TableRow key={expense.id}>
+                      <TableRow key={expense.id} className={getCategoryBackgroundColor(expense.category)}>
                         <TableCell className="font-medium">
                           {expense.title}
                         </TableCell>
