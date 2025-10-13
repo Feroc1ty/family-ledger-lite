@@ -24,6 +24,7 @@ export interface SavingsGoal {
   monthlySaving?: number;
   targetDate?: string;
   currentAmount: number;
+  alreadySavedThisMonth?: boolean;
 }
 
 export interface Expense {

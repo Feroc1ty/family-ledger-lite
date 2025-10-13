@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { PiggyBank, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SavingsGoal } from "@/types/budget";
@@ -27,6 +28,7 @@ const Savings = () => {
     monthlySaving: "",
     targetDate: "",
     currentAmount: "0",
+    alreadySavedThisMonth: false,
   });
 
   const totalMonthlyIncome = useMemo(() => {
@@ -55,24 +57,31 @@ const Savings = () => {
       let progressPercent = 0;
       let projectedTotal = 0;
 
+      if (goal.targetDate) {
+        // Рассчитываем количество месяцев до целевой даты
+        monthsToTarget = Math.ceil(
+          (new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)
+        );
+        
+        // Если уже отложил в текущем месяце, не учитываем его
+        if (goal.alreadySavedThisMonth && monthsToTarget > 0) {
+          monthsToTarget = monthsToTarget - 1;
+        }
+      }
+
       if (goal.targetAmount) {
         const remaining = goal.targetAmount - goal.currentAmount;
         progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
 
-        if (goal.targetDate) {
-          monthsToTarget = Math.ceil(
-            (new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)
-          );
-          if (monthsToTarget > 0) {
-            calculatedMonthlySaving = remaining / monthsToTarget;
-          }
+        if (goal.targetDate && monthsToTarget > 0) {
+          calculatedMonthlySaving = remaining / monthsToTarget;
         } else if (goal.monthlySaving) {
           monthsToTarget = Math.ceil(remaining / goal.monthlySaving);
         }
       }
 
       // Расчёт итоговой накопленной суммы к целевой дате
-      if (goal.targetDate && monthsToTarget > 0) {
+      if (goal.targetDate && monthsToTarget > 0 && calculatedMonthlySaving > 0) {
         projectedTotal = goal.currentAmount + (calculatedMonthlySaving * monthsToTarget);
       }
 
@@ -105,6 +114,7 @@ const Savings = () => {
       monthlySaving: formData.monthlySaving ? parseFloat(formData.monthlySaving) : undefined,
       targetDate: formData.targetDate || undefined,
       currentAmount: parseFloat(formData.currentAmount) || 0,
+      alreadySavedThisMonth: formData.alreadySavedThisMonth,
     };
 
     if (editingId) {
@@ -126,6 +136,7 @@ const Savings = () => {
       monthlySaving: goal.monthlySaving?.toString() || "",
       targetDate: goal.targetDate || "",
       currentAmount: goal.currentAmount.toString(),
+      alreadySavedThisMonth: goal.alreadySavedThisMonth || false,
     });
     setEditingId(goal.id);
     setIsAdding(true);
@@ -143,6 +154,7 @@ const Savings = () => {
       monthlySaving: "",
       targetDate: "",
       currentAmount: "0",
+      alreadySavedThisMonth: false,
     });
     setIsAdding(false);
     setEditingId(null);
@@ -294,6 +306,22 @@ const Savings = () => {
                     placeholder="0"
                   />
                 </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="alreadySavedThisMonth"
+                  checked={formData.alreadySavedThisMonth}
+                  onCheckedChange={(checked) => 
+                    setFormData({ ...formData, alreadySavedThisMonth: checked === true })
+                  }
+                />
+                <Label 
+                  htmlFor="alreadySavedThisMonth" 
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Уже отложил в этом месяце
+                </Label>
               </div>
 
               <div className="flex gap-2">
