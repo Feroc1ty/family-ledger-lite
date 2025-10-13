@@ -456,7 +456,7 @@ const Expenses = () => {
                 {filteredAndSortedExpenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className={`rounded-lg border-2 bg-card hover:shadow-sm transition-all duration-200 p-3 ${getCategoryBorderColor(expense.category)}`}
+                    className={`rounded-lg border bg-card hover:shadow-sm transition-all duration-200 p-3 ${getCategoryBorderColor(expense.category)}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex-1 min-w-0">
