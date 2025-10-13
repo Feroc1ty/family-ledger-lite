@@ -15,6 +15,7 @@ export type ExpenseCategory =
   | "Подарки"
   | "Дети"
   | "Налоги"
+  | "Подписки"
   | "Прочее";
 
 export interface SavingsGoal {

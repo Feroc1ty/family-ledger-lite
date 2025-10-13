@@ -50,6 +50,7 @@ const CATEGORIES: ExpenseCategory[] = [
   "Подарки",
   "Дети",
   "Налоги",
+  "Подписки",
   "Прочее",
 ];
 
@@ -203,6 +204,7 @@ const Expenses = () => {
       "Подарки": "bg-orange-50/80 dark:bg-orange-950/40",
       "Дети": "bg-yellow-50/80 dark:bg-yellow-950/40",
       "Налоги": "bg-red-50/80 dark:bg-red-950/40",
+      "Подписки": "bg-indigo-50/80 dark:bg-indigo-950/40",
       "Прочее": "bg-gray-50/80 dark:bg-gray-900/40",
     };
     return colors[category] || colors["Прочее"];
