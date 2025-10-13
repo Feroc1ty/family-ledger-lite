@@ -24,6 +24,8 @@ const ExpenseCalendar = () => {
 
   const monthlyExpenses = useMemo(() => {
     const result: MonthExpenses[] = [];
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth();
 
     for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
       const monthName = getMonthName(monthIndex);
@@ -39,7 +41,20 @@ const ExpenseCalendar = () => {
           ? Array.from({ length: 12 }, (_, i) => getMonthName(i)).indexOf(expense.startMonth)
           : 0;
 
-        if (monthIndex < startMonthIndex) return;
+        // Check if expense has started in the selected year
+        // If selected year is before the expense start year, don't show it
+        if (selectedYear < currentYear) {
+          // For past years, show all expenses
+        } else if (selectedYear === currentYear) {
+          // For current year, respect the startMonth
+          if (monthIndex < startMonthIndex) return;
+        } else {
+          // For future years, show expenses that have already started or will start
+          // Only skip if the expense starts in a future year
+          const yearsSinceStart = selectedYear - currentYear;
+          const monthsSinceStart = yearsSinceStart * 12 + monthIndex - startMonthIndex;
+          if (monthsSinceStart < 0 && currentMonth < startMonthIndex) return;
+        }
 
         let shouldInclude = false;
         let amount = expense.amount;
@@ -82,7 +97,7 @@ const ExpenseCalendar = () => {
     }
 
     return result;
-  }, [expenses]);
+  }, [expenses, selectedYear]);
 
   const toggleMonth = (monthIndex: number) => {
     setExpandedMonths((prev) => {
