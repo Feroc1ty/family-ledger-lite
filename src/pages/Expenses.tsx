@@ -452,18 +452,18 @@ const Expenses = () => {
                   )}
                 </button>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {filteredAndSortedExpenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className={`rounded-xl border-2 bg-card hover:shadow-md transition-all duration-200 p-4 ${getCategoryBorderColor(expense.category)}`}
+                    className={`rounded-lg border-2 bg-card hover:shadow-sm transition-all duration-200 p-3 ${getCategoryBorderColor(expense.category)}`}
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg mb-1 truncate">
+                        <h3 className="font-semibold text-base mb-0.5 truncate">
                           {expense.title}
                         </h3>
-                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <span className="font-medium">Категория:</span>
                             {expense.category}
@@ -474,28 +474,28 @@ const Expenses = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="text-2xl font-bold">
+                          <div className="text-lg font-bold">
                             {formatCurrency(expense.amount)}
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleEdit(expense)}
-                            className="h-9 w-9 p-0"
+                            className="h-8 w-8 p-0"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDelete(expense.id)}
-                            className="h-9 w-9 p-0"
+                            className="h-8 w-8 p-0"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>
