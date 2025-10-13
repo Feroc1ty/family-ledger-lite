@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useBudgetData } from "@/hooks/useBudgetData";
-import { formatCurrency, calculateMonthlyExpenses } from "@/utils/budgetCalculations";
+import { formatCurrency, calculateMonthlyExpenses, calculateMonthlySavingsGoals, calculatePlannedExpenses } from "@/utils/budgetCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -37,24 +37,16 @@ const Savings = () => {
     return calculateMonthlyExpenses(expenses);
   }, [expenses]);
 
+  const totalPlannedExpenses = useMemo(() => {
+    const currentMonth = new Date().getMonth();
+    return calculatePlannedExpenses(expenses, currentMonth);
+  }, [expenses]);
+
   const totalMonthlySavingsGoals = useMemo(() => {
-    return savingsGoals.reduce((sum, goal) => {
-      if (goal.monthlySaving) {
-        return sum + goal.monthlySaving;
-      }
-      if (goal.targetAmount && goal.targetDate) {
-        const monthsUntilTarget = Math.ceil(
-          (new Date(goal.targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30.44)
-        );
-        if (monthsUntilTarget > 0) {
-          return sum + (goal.targetAmount - goal.currentAmount) / monthsUntilTarget;
-        }
-      }
-      return sum;
-    }, 0);
+    return calculateMonthlySavingsGoals(savingsGoals);
   }, [savingsGoals]);
 
-  const remainingBalance = totalMonthlyIncome - totalMonthlyExpenses - totalMonthlySavingsGoals;
+  const remainingBalance = totalMonthlyIncome - totalMonthlyExpenses - totalPlannedExpenses - totalMonthlySavingsGoals;
 
   const enrichedGoals = useMemo(() => {
     return savingsGoals.map((goal) => {
@@ -158,7 +150,7 @@ const Savings = () => {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
@@ -167,25 +159,10 @@ const Savings = () => {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-muted-foreground mb-1">
-                  Откладываем ежемесячно
+                  Откладываем на цели
                 </p>
                 <p className="text-2xl font-bold text-primary">
                   {formatCurrency(totalMonthlySavingsGoals)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-green-500/20 bg-green-500/5">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground mb-1">
-                  Остается после расходов и целей
-                </p>
-                <p className={`text-2xl font-bold ${remainingBalance >= 0 ? 'text-green-600' : 'text-destructive'}`}>
-                  {formatCurrency(remainingBalance)}
                 </p>
               </div>
             </div>
@@ -201,6 +178,36 @@ const Savings = () => {
                 </p>
                 <p className="text-2xl font-bold">
                   {formatCurrency(totalMonthlyExpenses)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground mb-1">
+                  Отложенные расходы
+                </p>
+                <p className="text-2xl font-bold">
+                  {formatCurrency(totalPlannedExpenses)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-500/20 bg-green-500/5">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground mb-1">
+                  Остаток
+                </p>
+                <p className={`text-2xl font-bold ${remainingBalance >= 0 ? 'text-green-600' : 'text-destructive'}`}>
+                  {formatCurrency(remainingBalance)}
                 </p>
               </div>
             </div>

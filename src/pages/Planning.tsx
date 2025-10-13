@@ -13,11 +13,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const Planning = () => {
-  const { familyMembers, expenses } = useBudgetData();
+  const { familyMembers, expenses, savingsGoals } = useBudgetData();
 
   const yearlyBudget = useMemo(
-    () => calculateYearlyBudget(familyMembers, expenses),
-    [familyMembers, expenses]
+    () => calculateYearlyBudget(familyMembers, expenses, savingsGoals),
+    [familyMembers, expenses, savingsGoals]
   );
 
   const averageBalance = useMemo(() => {
@@ -48,6 +48,7 @@ const Planning = () => {
                   <TableHead className="text-right">Доход</TableHead>
                   <TableHead className="text-right">Обязательные</TableHead>
                   <TableHead className="text-right">Отложенные</TableHead>
+                  <TableHead className="text-right">Цели</TableHead>
                   <TableHead className="text-right">Всего расходов</TableHead>
                   <TableHead className="text-right">Остаток</TableHead>
                 </TableRow>
@@ -76,6 +77,9 @@ const Planning = () => {
                     </TableCell>
                     <TableCell className="text-right text-warning">
                       {formatCurrency(month.plannedExpenses)}
+                    </TableCell>
+                    <TableCell className="text-right text-primary">
+                      {formatCurrency(month.savingsGoals)}
                     </TableCell>
                     <TableCell className="text-right text-destructive">
                       {formatCurrency(month.totalExpenses)}

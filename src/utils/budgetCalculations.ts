@@ -1,4 +1,4 @@
-import { FamilyMember, Expense, BudgetMonth } from "@/types/budget";
+import { FamilyMember, Expense, BudgetMonth, SavingsGoal } from "@/types/budget";
 
 const MONTHS = [
   "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
@@ -80,9 +80,32 @@ export const calculatePlannedExpenses = (
   return total;
 };
 
+export const calculateMonthlySavingsGoals = (savingsGoals: SavingsGoal[]): number => {
+  return savingsGoals.reduce((total, goal) => {
+    if (goal.monthlySaving) {
+      return total + goal.monthlySaving;
+    }
+    
+    if (goal.targetAmount && goal.targetDate) {
+      const targetDate = new Date(goal.targetDate);
+      const now = new Date();
+      const monthsRemaining = Math.max(
+        1,
+        (targetDate.getFullYear() - now.getFullYear()) * 12 +
+        (targetDate.getMonth() - now.getMonth())
+      );
+      const remaining = Math.max(0, goal.targetAmount - (goal.currentAmount || 0));
+      return total + (remaining / monthsRemaining);
+    }
+    
+    return total;
+  }, 0);
+};
+
 export const calculateYearlyBudget = (
   familyMembers: FamilyMember[],
-  expenses: Expense[]
+  expenses: Expense[],
+  savingsGoals: SavingsGoal[] = []
 ): BudgetMonth[] => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth();
@@ -91,7 +114,8 @@ export const calculateYearlyBudget = (
     const totalIncome = calculateTotalIncome(familyMembers, index);
     const regularExpenses = calculateMonthlyExpenses(expenses);
     const plannedExpenses = calculatePlannedExpenses(expenses, index);
-    const totalExpenses = regularExpenses + plannedExpenses;
+    const savingsGoalsAmount = calculateMonthlySavingsGoals(savingsGoals);
+    const totalExpenses = regularExpenses + plannedExpenses + savingsGoalsAmount;
     const balance = totalIncome - totalExpenses;
 
     return {
@@ -100,6 +124,7 @@ export const calculateYearlyBudget = (
       totalIncome,
       regularExpenses,
       plannedExpenses,
+      savingsGoals: savingsGoalsAmount,
       totalExpenses,
       balance,
     };

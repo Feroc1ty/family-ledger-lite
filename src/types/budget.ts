@@ -42,6 +42,7 @@ export interface BudgetMonth {
   totalIncome: number;
   regularExpenses: number;
   plannedExpenses: number;
+  savingsGoals: number;
   totalExpenses: number;
   balance: number;
 }

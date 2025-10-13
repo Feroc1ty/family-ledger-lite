@@ -6,11 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, TrendingUp, Calendar } from "lucide-react";
 
 const Dashboard = () => {
-  const { familyMembers, expenses } = useBudgetData();
+  const { familyMembers, expenses, savingsGoals } = useBudgetData();
   
   const yearlyBudget = useMemo(
-    () => calculateYearlyBudget(familyMembers, expenses),
-    [familyMembers, expenses]
+    () => calculateYearlyBudget(familyMembers, expenses, savingsGoals),
+    [familyMembers, expenses, savingsGoals]
   );
 
   const currentMonth = new Date().getMonth();
@@ -43,7 +43,7 @@ const Dashboard = () => {
       </div>
 
       {/* Balance Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <BalanceCard
           title="Общий доход"
           amount={currentMonthData.totalIncome}
@@ -59,6 +59,12 @@ const Dashboard = () => {
           title="Отложенные расходы"
           amount={currentMonthData.plannedExpenses}
           description="Накопления на будущее"
+          variant="warning"
+        />
+        <BalanceCard
+          title="Откладываем на цели"
+          amount={currentMonthData.savingsGoals}
+          description="Накопления на цели"
           variant="warning"
         />
         <BalanceCard
