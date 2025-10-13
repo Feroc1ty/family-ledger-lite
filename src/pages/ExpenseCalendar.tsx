@@ -4,7 +4,7 @@ import { getMonthName, formatCurrency } from "@/utils/budgetCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Expense } from "@/types/budget";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface MonthExpenses {
@@ -19,6 +19,7 @@ interface MonthExpenses {
 
 const ExpenseCalendar = () => {
   const { expenses } = useBudgetData();
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [expandedMonths, setExpandedMonths] = useState<Set<number>>(new Set([new Date().getMonth()]));
 
   const monthlyExpenses = useMemo(() => {
@@ -120,25 +121,47 @@ const ExpenseCalendar = () => {
   };
 
   const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="space-y-6 animate-slide-up pb-20 md:pb-8">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Календарь расходов</h2>
-        <p className="text-muted-foreground">
-          Детальный просмотр расходов по месяцам
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">Календарь расходов</h2>
+          <p className="text-muted-foreground">
+            Детальный просмотр расходов по месяцам
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setSelectedYear(selectedYear - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-2xl font-bold min-w-[100px] text-center">
+            {selectedYear}
+          </span>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => setSelectedYear(selectedYear + 1)}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4">
         {monthlyExpenses.map((month) => (
-          <Card key={month.monthIndex} className={month.monthIndex === currentMonth ? "border-primary" : ""}>
+          <Card key={month.monthIndex} className={month.monthIndex === currentMonth && selectedYear === currentYear ? "border-primary" : ""}>
             <CardHeader className="cursor-pointer" onClick={() => toggleMonth(month.monthIndex)}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <CardTitle className="text-xl">
                     {month.monthName}
-                    {month.monthIndex === currentMonth && (
+                    {month.monthIndex === currentMonth && selectedYear === currentYear && (
                       <span className="ml-2 text-sm text-primary font-normal">
                         (текущий месяц)
                       </span>
