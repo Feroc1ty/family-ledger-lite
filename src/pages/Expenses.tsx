@@ -192,14 +192,14 @@ const Expenses = () => {
     return EXPENSE_TYPES.find((t) => t.value === type)?.label || type;
   };
 
-  const getCategoryBorderColor = (category: ExpenseCategory) => {
+  const getCategoryBackgroundColor = (category: ExpenseCategory) => {
     const colors: Record<string, string> = {
-      "Еда": "border-l-4 border-blue-500 hover:border-blue-600 dark:border-blue-400 dark:hover:border-blue-300",
-      "Авто": "border-l-4 border-purple-500 hover:border-purple-600 dark:border-purple-400 dark:hover:border-purple-300",
-      "Коммунальные": "border-l-4 border-green-500 hover:border-green-600 dark:border-green-400 dark:hover:border-green-300",
-      "Развлечения": "border-l-4 border-pink-500 hover:border-pink-600 dark:border-pink-400 dark:hover:border-pink-300",
-      "Подарки": "border-l-4 border-orange-500 hover:border-orange-600 dark:border-orange-400 dark:hover:border-orange-300",
-      "Прочее": "border-l-4 border-gray-400 hover:border-gray-500 dark:border-gray-500 dark:hover:border-gray-400",
+      "Еда": "bg-blue-50/80 dark:bg-blue-950/40",
+      "Авто": "bg-purple-50/80 dark:bg-purple-950/40",
+      "Коммунальные": "bg-green-50/80 dark:bg-green-950/40",
+      "Развлечения": "bg-pink-50/80 dark:bg-pink-950/40",
+      "Подарки": "bg-orange-50/80 dark:bg-orange-950/40",
+      "Прочее": "bg-gray-50/80 dark:bg-gray-900/40",
     };
     return colors[category] || colors["Прочее"];
   };
@@ -456,7 +456,7 @@ const Expenses = () => {
                 {filteredAndSortedExpenses.map((expense) => (
                   <div
                     key={expense.id}
-                    className={`rounded-lg border bg-card hover:shadow-sm transition-all duration-200 p-3 ${getCategoryBorderColor(expense.category)}`}
+                    className={`rounded-lg border border-border hover:shadow-sm transition-all duration-200 p-3 ${getCategoryBackgroundColor(expense.category)}`}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex-1 min-w-0">
