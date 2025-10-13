@@ -428,77 +428,80 @@ const Expenses = () => {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Название</TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-secondary/50"
-                        onClick={() => handleSort("category")}
-                      >
-                        <div className="flex items-center gap-1">
-                          Категория
-                          {sortField === "category" && (
-                            <span className="text-xs">
-                              {sortDirection === "asc" ? "↑" : "↓"}
-                            </span>
-                          )}
-                        </div>
-                      </TableHead>
-                      <TableHead 
-                        className="cursor-pointer hover:bg-secondary/50"
-                        onClick={() => handleSort("type")}
-                      >
-                        <div className="flex items-center gap-1">
-                          Тип
-                          {sortField === "type" && (
-                            <span className="text-xs">
-                              {sortDirection === "asc" ? "↑" : "↓"}
-                            </span>
-                          )}
-                        </div>
-                      </TableHead>
-                      <TableHead className="text-right">Сумма</TableHead>
-                      <TableHead className="text-right">Действия</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredAndSortedExpenses.map((expense) => (
-                      <TableRow 
-                        key={expense.id} 
-                        className={`rounded-lg border border-border/40 transition-all duration-200 mb-2 ${getCategoryBorderColor(expense.category)}`}
-                      >
-                        <TableCell className="font-medium rounded-l-lg">
+              <div className="mb-4 flex gap-4 text-sm">
+                <button
+                  onClick={() => handleSort("category")}
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Сортировка по категории
+                  {sortField === "category" && (
+                    <span className="text-xs">
+                      {sortDirection === "asc" ? "↑" : "↓"}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleSort("type")}
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Сортировка по типу
+                  {sortField === "type" && (
+                    <span className="text-xs">
+                      {sortDirection === "asc" ? "↑" : "↓"}
+                    </span>
+                  )}
+                </button>
+              </div>
+              <div className="space-y-3">
+                {filteredAndSortedExpenses.map((expense) => (
+                  <div
+                    key={expense.id}
+                    className={`rounded-xl border-2 bg-card hover:shadow-md transition-all duration-200 p-4 ${getCategoryBorderColor(expense.category)}`}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg mb-1 truncate">
                           {expense.title}
-                        </TableCell>
-                        <TableCell>{expense.category}</TableCell>
-                        <TableCell>{getTypeLabel(expense.type)}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(expense.amount)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(expense)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDelete(expense.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                        </h3>
+                        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium">Категория:</span>
+                            {expense.category}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium">Тип:</span>
+                            {getTypeLabel(expense.type)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="text-2xl font-bold">
+                            {formatCurrency(expense.amount)}
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(expense)}
+                            className="h-9 w-9 p-0"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(expense.id)}
+                            className="h-9 w-9 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="mt-4 pt-4 border-t space-y-3">
                 <div className="flex justify-between items-center">
