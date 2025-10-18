@@ -3,7 +3,8 @@ import { useBudgetData } from "@/hooks/useBudgetData";
 import { calculateYearlyBudget } from "@/utils/budgetCalculations";
 import BalanceCard from "@/components/BalanceCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, TrendingUp, Calendar } from "lucide-react";
+import { AlertCircle, TrendingUp, Calendar, TrendingDown } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const Dashboard = () => {
   const { familyMembers, expenses, savingsGoals } = useBudgetData();
@@ -29,6 +30,15 @@ const Dashboard = () => {
 
   const hasDeficit = yearlyBudget.some((month) => month.balance < 0);
   const deficitMonths = yearlyBudget.filter((month) => month.balance < 0);
+
+  const chartData = useMemo(() => {
+    return yearlyBudget.map((month) => ({
+      month: month.monthName.slice(0, 3), // Сокращённое название месяца
+      доходы: month.totalIncome,
+      расходы: month.regularExpenses + month.plannedExpenses + month.savingsGoals,
+      остаток: month.balance,
+    }));
+  }, [yearlyBudget]);
 
   return (
     <div className="space-y-8 animate-slide-up pb-20 md:pb-8">
@@ -74,6 +84,125 @@ const Dashboard = () => {
           variant={currentMonthData.balance >= 0 ? "success" : "destructive"}
         />
       </div>
+
+      {/* Yearly Dynamics Chart */}
+      <Card className="animate-fade-in">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingDown className="h-5 w-5 text-primary" />
+            Годовая динамика доходов и расходов
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={chartData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis 
+                  dataKey="month" 
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  className="text-xs"
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  tickFormatter={(value) => 
+                    new Intl.NumberFormat('ru-RU', {
+                      notation: 'compact',
+                      compactDisplay: 'short',
+                    }).format(value)
+                  }
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                  formatter={(value: number) =>
+                    new Intl.NumberFormat('ru-RU', {
+                      style: 'currency',
+                      currency: 'RUB',
+                      maximumFractionDigits: 0,
+                    }).format(value)
+                  }
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="доходы"
+                  stroke="hsl(142, 76%, 36%)"
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(142, 76%, 36%)', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="расходы"
+                  stroke="hsl(0, 84%, 60%)"
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(0, 84%, 60%)', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="остаток"
+                  stroke="hsl(217, 91%, 60%)"
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(217, 91%, 60%)', r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          
+          {/* Insights */}
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+              <p className="text-xs text-muted-foreground mb-1">Средний доход</p>
+              <p className="text-lg font-bold text-green-600">
+                {new Intl.NumberFormat('ru-RU', {
+                  style: 'currency',
+                  currency: 'RUB',
+                  maximumFractionDigits: 0,
+                }).format(
+                  yearlyBudget.reduce((sum, m) => sum + m.totalIncome, 0) / 12
+                )}
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+              <p className="text-xs text-muted-foreground mb-1">Средние расходы</p>
+              <p className="text-lg font-bold text-red-600">
+                {new Intl.NumberFormat('ru-RU', {
+                  style: 'currency',
+                  currency: 'RUB',
+                  maximumFractionDigits: 0,
+                }).format(
+                  yearlyBudget.reduce(
+                    (sum, m) => sum + m.regularExpenses + m.plannedExpenses + m.savingsGoals, 
+                    0
+                  ) / 12
+                )}
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-xs text-muted-foreground mb-1">Средний остаток</p>
+              <p className="text-lg font-bold text-blue-600">
+                {new Intl.NumberFormat('ru-RU', {
+                  style: 'currency',
+                  currency: 'RUB',
+                  maximumFractionDigits: 0,
+                }).format(
+                  yearlyBudget.reduce((sum, m) => sum + m.balance, 0) / 12
+                )}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Recommendations */}
       <div className="grid gap-4 md:grid-cols-2">
