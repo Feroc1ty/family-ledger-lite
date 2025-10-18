@@ -1,7 +1,10 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Receipt, CalendarDays, Calendar, PiggyBank } from "lucide-react";
+import { Home, Users, Receipt, CalendarDays, Calendar, PiggyBank, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { exportData } from "@/utils/dataExport";
+import { useToast } from "@/hooks/use-toast";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,6 +12,23 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const { toast } = useToast();
+
+  const handleExport = () => {
+    try {
+      exportData();
+      toast({
+        title: "Данные экспортированы",
+        description: "Файл с вашими данными успешно сохранен",
+      });
+    } catch (error) {
+      toast({
+        title: "Ошибка экспорта",
+        description: "Не удалось экспортировать данные",
+        variant: "destructive",
+      });
+    }
+  };
 
   const navItems = [
     { path: "/", label: "Главная", icon: Home },
@@ -25,7 +45,17 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-primary">Family Budget</h1>
-            <nav className="hidden md:flex gap-1">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                className="hidden md:flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Экспорт данных
+              </Button>
+              <nav className="hidden md:flex gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path;
@@ -45,7 +75,8 @@ const Layout = ({ children }: LayoutProps) => {
                   </Link>
                 );
               })}
-            </nav>
+              </nav>
+            </div>
           </div>
         </div>
       </header>

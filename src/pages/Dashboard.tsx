@@ -86,7 +86,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="p-3 rounded-lg bg-secondary">
-              <p className="text-sm font-medium mb-1">Рекомендовано откладывать</p>
+              <p className="text-sm font-medium mb-1">Рекомендовано откладывать каждый месяц</p>
               <p className="text-2xl font-bold text-primary">
                 {new Intl.NumberFormat('ru-RU', {
                   style: 'currency',
@@ -95,7 +95,8 @@ const Dashboard = () => {
                 }).format(recommendedSavings)}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Для покрытия будущих расходов
+                Это сумма для ежемесячного откладывания, которая поможет покрыть ваши квартальные и годовые расходы. 
+                Откладывая эту сумму каждый месяц, вы будете готовы к крупным тратам в течение года.
               </p>
             </div>
             {currentMonthData.balance > recommendedSavings && (
