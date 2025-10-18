@@ -112,19 +112,34 @@ const ExpenseCalendar = () => {
     return result;
   }, [expenses, selectedYear]);
 
-  const maxAmount = useMemo(() => {
-    return Math.max(...monthlyData.map((d) => d.total), 1);
+  const { minAmount, maxAmount } = useMemo(() => {
+    const amounts = monthlyData.map((d) => d.total).filter(a => a > 0);
+    if (amounts.length === 0) return { minAmount: 0, maxAmount: 1 };
+    return {
+      minAmount: Math.min(...amounts),
+      maxAmount: Math.max(...amounts)
+    };
   }, [monthlyData]);
 
   const getHeatmapColor = (amount: number) => {
     if (amount === 0) return "bg-muted/30 hover:bg-muted/50";
-    const intensity = Math.min(amount / maxAmount, 1);
     
-    if (intensity < 0.2) return "bg-destructive/20 hover:bg-destructive/30";
-    if (intensity < 0.4) return "bg-destructive/40 hover:bg-destructive/50";
-    if (intensity < 0.6) return "bg-destructive/60 hover:bg-destructive/70";
-    if (intensity < 0.8) return "bg-destructive/80 hover:bg-destructive/90";
-    return "bg-destructive hover:bg-destructive/90";
+    // Normalize between minAmount and maxAmount
+    const range = maxAmount - minAmount;
+    if (range === 0) return "bg-destructive/20 hover:bg-destructive/30";
+    
+    const normalized = (amount - minAmount) / range;
+    const intensity = Math.min(Math.max(normalized, 0), 1);
+    
+    // Month with minimum expense - no/minimal highlight
+    if (intensity < 0.15) return "bg-muted/50 hover:bg-muted/60";
+    // Gradual increase in red intensity
+    if (intensity < 0.3) return "bg-destructive/20 hover:bg-destructive/30";
+    if (intensity < 0.5) return "bg-destructive/35 hover:bg-destructive/45";
+    if (intensity < 0.7) return "bg-destructive/50 hover:bg-destructive/60";
+    if (intensity < 0.85) return "bg-destructive/65 hover:bg-destructive/75";
+    // Month with maximum expense - light red
+    return "bg-destructive/80 hover:bg-destructive/90";
   };
 
   const getCategoryColor = (category: ExpenseCategory): string => {
