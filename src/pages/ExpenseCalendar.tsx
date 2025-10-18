@@ -126,20 +126,29 @@ const ExpenseCalendar = () => {
     
     // Normalize between minAmount and maxAmount
     const range = maxAmount - minAmount;
-    if (range === 0) return "bg-destructive/20 hover:bg-destructive/30";
+    if (range === 0) return "bg-green-500/30 hover:bg-green-500/40";
     
     const normalized = (amount - minAmount) / range;
     const intensity = Math.min(Math.max(normalized, 0), 1);
     
-    // Month with minimum expense - no/minimal highlight
-    if (intensity < 0.15) return "bg-muted/50 hover:bg-muted/60";
-    // Gradual increase in red intensity
-    if (intensity < 0.3) return "bg-destructive/20 hover:bg-destructive/30";
-    if (intensity < 0.5) return "bg-destructive/35 hover:bg-destructive/45";
-    if (intensity < 0.7) return "bg-destructive/50 hover:bg-destructive/60";
-    if (intensity < 0.85) return "bg-destructive/65 hover:bg-destructive/75";
-    // Month with maximum expense - light red
-    return "bg-destructive/80 hover:bg-destructive/90";
+    // Green zone (low expenses) - 0 to 0.25
+    if (intensity < 0.15) return "bg-green-500/40 hover:bg-green-500/50";
+    if (intensity < 0.25) return "bg-green-500/50 hover:bg-green-500/60";
+    
+    // Green to yellow transition - 0.25 to 0.4
+    if (intensity < 0.35) return "bg-green-400/60 hover:bg-green-400/70";
+    if (intensity < 0.4) return "bg-yellow-500/50 hover:bg-yellow-500/60";
+    
+    // Orange zone (medium expenses) - 0.4 to 0.65
+    if (intensity < 0.5) return "bg-orange-400/50 hover:bg-orange-400/60";
+    if (intensity < 0.65) return "bg-orange-500/60 hover:bg-orange-500/70";
+    
+    // Orange to red transition - 0.65 to 0.8
+    if (intensity < 0.75) return "bg-orange-600/70 hover:bg-orange-600/80";
+    if (intensity < 0.85) return "bg-red-500/60 hover:bg-red-500/70";
+    
+    // Red zone (high expenses) - 0.85 to 1.0
+    return "bg-red-500/70 hover:bg-red-500/80";
   };
 
   const getCategoryColor = (category: ExpenseCategory): string => {
@@ -226,11 +235,11 @@ const ExpenseCalendar = () => {
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <span>Низкие расходы</span>
             <div className="flex gap-1">
-              <div className="w-4 h-4 bg-destructive/20 rounded border border-border" />
-              <div className="w-4 h-4 bg-destructive/40 rounded border border-border" />
-              <div className="w-4 h-4 bg-destructive/60 rounded border border-border" />
-              <div className="w-4 h-4 bg-destructive/80 rounded border border-border" />
-              <div className="w-4 h-4 bg-destructive rounded border border-border" />
+              <div className="w-4 h-4 bg-green-500/50 rounded border border-border" />
+              <div className="w-4 h-4 bg-yellow-500/50 rounded border border-border" />
+              <div className="w-4 h-4 bg-orange-500/60 rounded border border-border" />
+              <div className="w-4 h-4 bg-orange-600/70 rounded border border-border" />
+              <div className="w-4 h-4 bg-red-500/70 rounded border border-border" />
             </div>
             <span>Высокие расходы</span>
           </div>
