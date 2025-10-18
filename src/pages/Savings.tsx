@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { PiggyBank, Plus, Pencil, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { PiggyBank, Plus, Pencil, Trash2, Target } from "lucide-react";
 import { toast } from "sonner";
 import { SavingsGoal } from "@/types/budget";
 
@@ -233,6 +234,84 @@ const Savings = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Progress bars for goals */}
+      {enrichedGoals.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              <CardTitle>Прогресс по целям</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {enrichedGoals.map((goal) => {
+              const progress = goal.targetAmount 
+                ? Math.min((goal.currentAmount / goal.targetAmount) * 100, 100)
+                : 0;
+              
+              const getProgressColor = (percent: number) => {
+                if (percent >= 70) return "bg-green-500";
+                if (percent >= 30) return "bg-orange-500";
+                return "bg-red-500";
+              };
+
+              const remaining = goal.targetAmount 
+                ? goal.targetAmount - goal.currentAmount 
+                : 0;
+
+              return (
+                <div key={goal.id} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg">{goal.title}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {formatCurrency(goal.currentAmount)} из {goal.targetAmount ? formatCurrency(goal.targetAmount) : "—"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold" style={{ 
+                        color: progress >= 70 ? 'hsl(142, 76%, 36%)' : progress >= 30 ? 'hsl(20, 100%, 50%)' : 'hsl(0, 84%, 60%)'
+                      }}>
+                        {Math.round(progress)}%
+                      </p>
+                      {remaining > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          осталось {formatCurrency(remaining)}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <Progress 
+                      value={progress} 
+                      className="h-3"
+                    />
+                    <div 
+                      className={`absolute top-0 left-0 h-3 rounded-full transition-all ${getProgressColor(progress)}`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+
+                  {goal.targetDate && (
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>
+                        Целевая дата: {new Date(goal.targetDate).toLocaleDateString("ru-RU")}
+                      </span>
+                      {goal.monthsToTarget > 0 && (
+                        <span>
+                          {goal.monthsToTarget} {goal.monthsToTarget === 1 ? 'месяц' : goal.monthsToTarget < 5 ? 'месяца' : 'месяцев'}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {!isAdding && (
         <Button onClick={() => setIsAdding(true)} className="w-full md:w-auto">
