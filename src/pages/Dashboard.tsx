@@ -85,6 +85,78 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Recommendations */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card className="animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Рекомендации
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="p-3 rounded-lg bg-secondary">
+              <p className="text-sm font-medium mb-1">Рекомендовано откладывать каждый месяц</p>
+              <p className="text-2xl font-bold text-primary">
+                {new Intl.NumberFormat('ru-RU', {
+                  style: 'currency',
+                  currency: 'RUB',
+                  maximumFractionDigits: 0,
+                }).format(recommendedSavings)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Это сумма для ежемесячного откладывания, которая поможет покрыть ваши квартальные и годовые расходы. 
+                Откладывая эту сумму каждый месяц, вы будете готовы к крупным тратам в течение года.
+              </p>
+            </div>
+            {currentMonthData.balance > recommendedSavings && (
+              <p className="text-sm text-success flex items-center gap-2">
+                <span className="text-lg">✓</span>
+                У вас достаточно средств для накоплений
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertCircle className="h-5 w-5 text-warning" />
+              Предупреждения
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {hasDeficit ? (
+              <>
+                {deficitMonths.map((month) => (
+                  <div
+                    key={month.monthName}
+                    className="p-3 rounded-lg bg-destructive/10 border border-destructive/20"
+                  >
+                    <p className="text-sm font-medium text-destructive flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {month.monthName}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Дефицит: {new Intl.NumberFormat('ru-RU', {
+                        style: 'currency',
+                        currency: 'RUB',
+                        maximumFractionDigits: 0,
+                      }).format(Math.abs(month.balance))}
+                    </p>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <p className="text-sm text-success flex items-center gap-2">
+                <span className="text-lg">✓</span>
+                Все месяцы сбалансированы
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Yearly Dynamics Chart */}
       <Card className="animate-fade-in">
         <CardHeader>
@@ -203,78 +275,6 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Recommendations */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Рекомендации
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="p-3 rounded-lg bg-secondary">
-              <p className="text-sm font-medium mb-1">Рекомендовано откладывать каждый месяц</p>
-              <p className="text-2xl font-bold text-primary">
-                {new Intl.NumberFormat('ru-RU', {
-                  style: 'currency',
-                  currency: 'RUB',
-                  maximumFractionDigits: 0,
-                }).format(recommendedSavings)}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Это сумма для ежемесячного откладывания, которая поможет покрыть ваши квартальные и годовые расходы. 
-                Откладывая эту сумму каждый месяц, вы будете готовы к крупным тратам в течение года.
-              </p>
-            </div>
-            {currentMonthData.balance > recommendedSavings && (
-              <p className="text-sm text-success flex items-center gap-2">
-                <span className="text-lg">✓</span>
-                У вас достаточно средств для накоплений
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <AlertCircle className="h-5 w-5 text-warning" />
-              Предупреждения
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {hasDeficit ? (
-              <>
-                {deficitMonths.map((month) => (
-                  <div
-                    key={month.monthName}
-                    className="p-3 rounded-lg bg-destructive/10 border border-destructive/20"
-                  >
-                    <p className="text-sm font-medium text-destructive flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {month.monthName}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Дефицит: {new Intl.NumberFormat('ru-RU', {
-                        style: 'currency',
-                        currency: 'RUB',
-                        maximumFractionDigits: 0,
-                      }).format(Math.abs(month.balance))}
-                    </p>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <p className="text-sm text-success flex items-center gap-2">
-                <span className="text-lg">✓</span>
-                Все месяцы сбалансированы
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Quick Stats */}
       <Card className="animate-fade-in">
