@@ -278,7 +278,7 @@ const ExpenseCalendar = () => {
                             cy="50%"
                             labelLine={true}
                             label={({ name, percent }) =>
-                              percent > 0.08 ? `${name}: ${(percent * 100).toFixed(0)}%` : ''
+                              `${name}: ${(percent * 100).toFixed(0)}%`
                             }
                             outerRadius={100}
                             fill="#8884d8"
