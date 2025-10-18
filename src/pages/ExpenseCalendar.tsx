@@ -2,154 +2,171 @@ import { useMemo, useState } from "react";
 import { useBudgetData } from "@/hooks/useBudgetData";
 import { getMonthName, formatCurrency } from "@/utils/budgetCalculations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Expense } from "@/types/budget";
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Expense, ExpenseCategory } from "@/types/budget";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
-interface MonthExpenses {
-  monthName: string;
+interface CategoryMonthData {
+  category: ExpenseCategory;
   monthIndex: number;
+  monthName: string;
+  total: number;
   expenses: {
     expense: Expense;
     amount: number;
   }[];
-  total: number;
 }
 
 const ExpenseCalendar = () => {
   const { expenses } = useBudgetData();
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [expandedMonths, setExpandedMonths] = useState<Set<number>>(new Set([new Date().getMonth()]));
+  const [selectedCell, setSelectedCell] = useState<CategoryMonthData | null>(null);
 
-  const monthlyExpenses = useMemo(() => {
-    const result: MonthExpenses[] = [];
+  const categories: ExpenseCategory[] = [
+    "Еда",
+    "Авто",
+    "Коммунальные",
+    "Развлечения",
+    "Подарки",
+    "Дети",
+    "Налоги",
+    "Подписки",
+    "Прочее",
+  ];
+
+  const heatmapData = useMemo(() => {
+    const result: CategoryMonthData[] = [];
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
 
-    for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
-      const monthName = getMonthName(monthIndex);
-      const monthExpenses: MonthExpenses = {
-        monthName,
-        monthIndex,
-        expenses: [],
-        total: 0,
-      };
+    categories.forEach((category) => {
+      for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+        const monthName = getMonthName(monthIndex);
+        const cellData: CategoryMonthData = {
+          category,
+          monthIndex,
+          monthName,
+          total: 0,
+          expenses: [],
+        };
 
-      expenses.forEach((expense) => {
-        const startMonthIndex = expense.startMonth
-          ? Array.from({ length: 12 }, (_, i) => getMonthName(i)).indexOf(expense.startMonth)
-          : 0;
+        expenses
+          .filter((expense) => expense.category === category)
+          .forEach((expense) => {
+            const startMonthIndex = expense.startMonth
+              ? Array.from({ length: 12 }, (_, i) => getMonthName(i)).indexOf(expense.startMonth)
+              : 0;
 
-        // Check if expense has started in the selected year
-        // If selected year is before the expense start year, don't show it
-        if (selectedYear < currentYear) {
-          // For past years, show all expenses
-        } else if (selectedYear === currentYear) {
-          // For current year, respect the startMonth
-          if (monthIndex < startMonthIndex) return;
-        } else {
-          // For future years, show expenses that have already started or will start
-          // Only skip if the expense starts in a future year
-          const yearsSinceStart = selectedYear - currentYear;
-          const monthsSinceStart = yearsSinceStart * 12 + monthIndex - startMonthIndex;
-          if (monthsSinceStart < 0 && currentMonth < startMonthIndex) return;
-        }
-
-        let shouldInclude = false;
-        let amount = expense.amount;
-
-        switch (expense.type) {
-          case "daily":
-            shouldInclude = true;
-            amount = expense.amount * 30.44;
-            break;
-          case "weekly":
-            shouldInclude = true;
-            amount = expense.amount * 4.33;
-            break;
-          case "monthly":
-            shouldInclude = true;
-            break;
-          case "quarterly":
-            shouldInclude = (monthIndex - startMonthIndex) % 3 === 0;
-            break;
-          case "yearly":
-            if (expense.dueMonth) {
-              const dueMonthIndex = Array.from({ length: 12 }, (_, i) => getMonthName(i)).indexOf(expense.dueMonth);
-              shouldInclude = monthIndex === dueMonthIndex;
+            if (selectedYear < currentYear) {
+              // Past years - show all expenses
+            } else if (selectedYear === currentYear) {
+              if (monthIndex < startMonthIndex) return;
+            } else {
+              const yearsSinceStart = selectedYear - currentYear;
+              const monthsSinceStart = yearsSinceStart * 12 + monthIndex - startMonthIndex;
+              if (monthsSinceStart < 0 && currentMonth < startMonthIndex) return;
             }
-            break;
-          case "custom":
-            if (expense.customPeriodMonths) {
-              shouldInclude = (monthIndex - startMonthIndex) % expense.customPeriodMonths === 0;
+
+            let shouldInclude = false;
+            let amount = expense.amount;
+
+            switch (expense.type) {
+              case "daily":
+                shouldInclude = true;
+                amount = expense.amount * 30.44;
+                break;
+              case "weekly":
+                shouldInclude = true;
+                amount = expense.amount * 4.33;
+                break;
+              case "monthly":
+                shouldInclude = true;
+                break;
+              case "quarterly":
+                shouldInclude = (monthIndex - startMonthIndex) % 3 === 0;
+                break;
+              case "yearly":
+                if (expense.dueMonth) {
+                  const dueMonthIndex = Array.from({ length: 12 }, (_, i) =>
+                    getMonthName(i)
+                  ).indexOf(expense.dueMonth);
+                  shouldInclude = monthIndex === dueMonthIndex;
+                }
+                break;
+              case "custom":
+                if (expense.customPeriodMonths) {
+                  shouldInclude =
+                    (monthIndex - startMonthIndex) % expense.customPeriodMonths === 0;
+                }
+                break;
             }
-            break;
-        }
 
-        if (shouldInclude) {
-          monthExpenses.expenses.push({ expense, amount });
-          monthExpenses.total += amount;
-        }
-      });
+            if (shouldInclude) {
+              cellData.expenses.push({ expense, amount });
+              cellData.total += amount;
+            }
+          });
 
-      result.push(monthExpenses);
-    }
+        result.push(cellData);
+      }
+    });
 
     return result;
-  }, [expenses, selectedYear]);
+  }, [expenses, selectedYear, categories]);
 
-  const toggleMonth = (monthIndex: number) => {
-    setExpandedMonths((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(monthIndex)) {
-        newSet.delete(monthIndex);
-      } else {
-        newSet.add(monthIndex);
-      }
-      return newSet;
-    });
+  const maxAmount = useMemo(() => {
+    return Math.max(...heatmapData.map((d) => d.total), 1);
+  }, [heatmapData]);
+
+  const getHeatmapColor = (amount: number) => {
+    if (amount === 0) return "bg-muted/30";
+    const intensity = Math.min(amount / maxAmount, 1);
+    
+    if (intensity < 0.2) return "bg-destructive/20";
+    if (intensity < 0.4) return "bg-destructive/40";
+    if (intensity < 0.6) return "bg-destructive/60";
+    if (intensity < 0.8) return "bg-destructive/80";
+    return "bg-destructive";
   };
 
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      daily: "Ежедневный",
-      weekly: "Еженедельный",
-      monthly: "Ежемесячный",
-      quarterly: "Раз в 3 месяца",
-      yearly: "Раз в год",
-      custom: "Пользовательский",
+  const getCategoryColor = (category: ExpenseCategory): string => {
+    const colors: Record<ExpenseCategory, string> = {
+      "Еда": "hsl(210, 60%, 55%)",
+      "Авто": "hsl(280, 60%, 60%)",
+      "Коммунальные": "hsl(123, 46%, 45%)",
+      "Развлечения": "hsl(340, 75%, 55%)",
+      "Подарки": "hsl(29, 100%, 48%)",
+      "Дети": "hsl(180, 60%, 50%)",
+      "Налоги": "hsl(0, 60%, 50%)",
+      "Подписки": "hsl(260, 60%, 55%)",
+      "Прочее": "hsl(210, 10%, 45%)",
     };
-    return labels[type] || type;
+    return colors[category];
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      "Еда": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-      "Авто": "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-      "Коммунальные": "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      "Развлечения": "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200",
-      "Подарки": "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
-      "Прочее": "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-    };
-    return colors[category] || colors["Прочее"];
-  };
-
-  const currentMonth = new Date().getMonth();
-  const currentYear = new Date().getFullYear();
+  const pieChartData = useMemo(() => {
+    if (!selectedCell) return [];
+    return selectedCell.expenses.map(({ expense, amount }) => ({
+      name: expense.title,
+      value: amount,
+      category: expense.category,
+    }));
+  }, [selectedCell]);
 
   return (
     <div className="space-y-6 animate-slide-up pb-20 md:pb-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold mb-2">Календарь расходов</h2>
+          <h2 className="text-3xl font-bold mb-2">Тепловая карта расходов</h2>
           <p className="text-muted-foreground">
-            Детальный просмотр расходов по месяцам
+            Визуализация расходов по категориям и месяцам
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             onClick={() => setSelectedYear(selectedYear - 1)}
           >
@@ -158,8 +175,8 @@ const ExpenseCalendar = () => {
           <span className="text-2xl font-bold min-w-[100px] text-center">
             {selectedYear}
           </span>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
             onClick={() => setSelectedYear(selectedYear + 1)}
           >
@@ -168,89 +185,159 @@ const ExpenseCalendar = () => {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {monthlyExpenses.map((month) => (
-          <Card key={month.monthIndex} className={month.monthIndex === currentMonth && selectedYear === currentYear ? "border-primary" : ""}>
-            <CardHeader className="cursor-pointer" onClick={() => toggleMonth(month.monthIndex)}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CardTitle className="text-xl">
-                    {month.monthName}
-                    {month.monthIndex === currentMonth && selectedYear === currentYear && (
-                      <span className="ml-2 text-sm text-primary font-normal">
-                        (текущий месяц)
-                      </span>
-                    )}
-                  </CardTitle>
-                  <Badge variant={month.expenses.length > 0 ? "default" : "secondary"}>
-                    {month.expenses.length} {month.expenses.length === 1 ? "расход" : "расходов"}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-2xl font-bold text-destructive">
-                    {formatCurrency(month.total)}
-                  </span>
-                  <Button variant="ghost" size="sm">
-                    {expandedMonths.has(month.monthIndex) ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="overflow-x-auto">
+            <div className="inline-block min-w-full">
+              {/* Header with month names */}
+              <div className="flex mb-2">
+                <div className="w-32 flex-shrink-0" />
+                {Array.from({ length: 12 }, (_, i) => (
+                  <div
+                    key={i}
+                    className="w-20 text-center text-xs font-medium text-muted-foreground flex-shrink-0"
+                  >
+                    {getMonthName(i).slice(0, 3)}
+                  </div>
+                ))}
               </div>
-            </CardHeader>
-            {expandedMonths.has(month.monthIndex) && (
-              <CardContent>
-                {month.expenses.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">
-                    Нет запланированных расходов
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {month.expenses.map(({ expense, amount }, index) => (
+
+              {/* Heatmap rows */}
+              {categories.map((category) => (
+                <div key={category} className="flex items-center mb-1">
+                  <div className="w-32 text-sm font-medium pr-4 flex-shrink-0">
+                    {category}
+                  </div>
+                  {Array.from({ length: 12 }, (_, monthIndex) => {
+                    const cellData = heatmapData.find(
+                      (d) => d.category === category && d.monthIndex === monthIndex
+                    );
+                    const amount = cellData?.total || 0;
+
+                    return (
+                      <div
+                        key={monthIndex}
+                        className={`w-20 h-12 flex items-center justify-center cursor-pointer rounded border border-border transition-all hover:scale-105 hover:shadow-md flex-shrink-0 ${getHeatmapColor(
+                          amount
+                        )}`}
+                        onClick={() => cellData && setSelectedCell(cellData)}
+                      >
+                        {amount > 0 && (
+                          <span className="text-xs font-semibold">
+                            {(amount / 1000).toFixed(0)}k
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <span>Низкие расходы</span>
+            <div className="flex gap-1">
+              <div className="w-4 h-4 bg-destructive/20 rounded border border-border" />
+              <div className="w-4 h-4 bg-destructive/40 rounded border border-border" />
+              <div className="w-4 h-4 bg-destructive/60 rounded border border-border" />
+              <div className="w-4 h-4 bg-destructive/80 rounded border border-border" />
+              <div className="w-4 h-4 bg-destructive rounded border border-border" />
+            </div>
+            <span>Высокие расходы</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Detail Dialog */}
+      <Dialog open={!!selectedCell} onOpenChange={(open) => !open && setSelectedCell(null)}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedCell?.category} - {selectedCell?.monthName}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedCell && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground mb-1">Общая сумма</p>
+                <p className="text-3xl font-bold text-destructive">
+                  {formatCurrency(selectedCell.total)}
+                </p>
+              </div>
+
+              {selectedCell.expenses.length > 0 && (
+                <>
+                  {/* Pie Chart */}
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={pieChartData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) =>
+                            `${name}: ${(percent * 100).toFixed(0)}%`
+                          }
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {pieChartData.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={getCategoryColor(entry.category)}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(value: number) => formatCurrency(value)}
+                        />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Detailed list */}
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg">Детализация расходов</h3>
+                    {selectedCell.expenses.map(({ expense, amount }, index) => (
                       <div
                         key={`${expense.id}-${index}`}
-                        className="flex items-center justify-between p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-lg bg-secondary/30"
                       >
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{expense.title}</h4>
-                            <Badge className={getCategoryColor(expense.category)} variant="secondary">
-                              {expense.category}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span>{getTypeLabel(expense.type)}</span>
-                            {expense.type === "weekly" && expense.dayOfWeek && (
-                              <span>• {expense.dayOfWeek}</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-destructive">
-                            {formatCurrency(amount)}
+                          <p className="font-medium">{expense.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {expense.type === "daily" && "Ежедневный"}
+                            {expense.type === "weekly" && "Еженедельный"}
+                            {expense.type === "monthly" && "Ежемесячный"}
+                            {expense.type === "quarterly" && "Раз в 3 месяца"}
+                            {expense.type === "yearly" && "Раз в год"}
+                            {expense.type === "custom" && "Пользовательский"}
                           </p>
-                          {expense.type === "daily" && (
-                            <p className="text-xs text-muted-foreground">
-                              {formatCurrency(expense.amount)} × 30.44 дней
-                            </p>
-                          )}
-                          {expense.type === "weekly" && (
-                            <p className="text-xs text-muted-foreground">
-                              {formatCurrency(expense.amount)} × 4.33 недели
-                            </p>
-                          )}
                         </div>
+                        <p className="text-lg font-bold text-destructive">
+                          {formatCurrency(amount)}
+                        </p>
                       </div>
                     ))}
                   </div>
-                )}
-              </CardContent>
-            )}
-          </Card>
-        ))}
-      </div>
+                </>
+              )}
+
+              {selectedCell.expenses.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  Нет расходов в этой категории за выбранный месяц
+                </p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
