@@ -4,6 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Family from "./pages/Family";
 import Expenses from "./pages/Expenses";
@@ -20,17 +23,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/family" element={<Family />} />
             <Route path="/expenses" element={<Expenses />} />
             <Route path="/expense-calendar" element={<ExpenseCalendar />} />
             <Route path="/planning" element={<Planning />} />
             <Route path="/savings" element={<Savings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

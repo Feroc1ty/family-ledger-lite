@@ -1,16 +1,11 @@
-import { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, Outlet } from "react-router-dom";
 import { Home, Users, Receipt, CalendarDays, Calendar, PiggyBank, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { exportData } from "@/utils/dataExport";
 import { useToast } from "@/hooks/use-toast";
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-const Layout = ({ children }: LayoutProps) => {
+const Layout = () => {
   const location = useLocation();
   const { toast } = useToast();
 
@@ -31,7 +26,7 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   const navItems = [
-    { path: "/", label: "Главная", icon: Home },
+    { path: "/dashboard", label: "Главная", icon: Home },
     { path: "/family", label: "Семья", icon: Users },
     { path: "/expenses", label: "Расходы", icon: Receipt },
     { path: "/expense-calendar", label: "Календарь", icon: CalendarDays },
@@ -82,7 +77,7 @@ const Layout = ({ children }: LayoutProps) => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {children}
+        <Outlet />
       </main>
 
       {/* Mobile Navigation */}
