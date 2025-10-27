@@ -159,12 +159,12 @@ const ExpenseCalendar = () => {
     if (intensity < 0.8) return "bg-orange-600/80 hover:bg-orange-600/90";
     
     // Красно-оранжевый к красному - 0.8 to 1.0
-    if (intensity < 0.85) return "bg-red-500/70 hover:bg-red-500/80";
-    if (intensity < 0.9) return "bg-red-600/70 hover:bg-red-600/80";
-    if (intensity < 0.95) return "bg-red-600/75 hover:bg-red-600/85";
+    if (intensity < 0.85) return "bg-red-400/60 hover:bg-red-400/70";
+    if (intensity < 0.9) return "bg-red-500/60 hover:bg-red-500/70";
+    if (intensity < 0.95) return "bg-red-500/65 hover:bg-red-500/75";
     
     // Максимальные расходы
-    return "bg-red-600/80 hover:bg-red-600/90";
+    return "bg-red-500/70 hover:bg-red-500/80";
   };
 
   const getCategoryColor = (category: ExpenseCategory): string => {
