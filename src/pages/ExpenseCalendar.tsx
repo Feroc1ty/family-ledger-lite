@@ -131,39 +131,23 @@ const ExpenseCalendar = () => {
     const normalized = (amount - minAmount) / range;
     const intensity = Math.min(Math.max(normalized, 0), 1);
     
-    // Плавный градиент от зеленого к красному (16 шагов)
-    // Темно-зеленый (низкие расходы) - 0 to 0.2
-    if (intensity < 0.05) return "bg-green-600/40 hover:bg-green-600/50";
-    if (intensity < 0.1) return "bg-green-500/40 hover:bg-green-500/50";
-    if (intensity < 0.15) return "bg-green-500/50 hover:bg-green-500/60";
-    if (intensity < 0.2) return "bg-green-400/50 hover:bg-green-400/60";
+    // Green zone (low expenses) - 0 to 0.25
+    if (intensity < 0.15) return "bg-green-500/40 hover:bg-green-500/50";
+    if (intensity < 0.25) return "bg-green-500/50 hover:bg-green-500/60";
     
-    // Светло-зеленый к желто-зеленому - 0.2 to 0.35
-    if (intensity < 0.25) return "bg-green-400/60 hover:bg-green-400/70";
-    if (intensity < 0.3) return "bg-lime-400/60 hover:bg-lime-400/70";
-    if (intensity < 0.35) return "bg-lime-500/60 hover:bg-lime-500/70";
+    // Green to yellow transition - 0.25 to 0.4
+    if (intensity < 0.35) return "bg-green-400/60 hover:bg-green-400/70";
+    if (intensity < 0.4) return "bg-yellow-500/50 hover:bg-yellow-500/60";
     
-    // Желтый - 0.35 to 0.5
-    if (intensity < 0.4) return "bg-yellow-400/60 hover:bg-yellow-400/70";
-    if (intensity < 0.45) return "bg-yellow-500/60 hover:bg-yellow-500/70";
-    if (intensity < 0.5) return "bg-yellow-500/70 hover:bg-yellow-500/80";
-    
-    // Желто-оранжевый - 0.5 to 0.65
-    if (intensity < 0.55) return "bg-amber-500/60 hover:bg-amber-500/70";
-    if (intensity < 0.6) return "bg-orange-400/60 hover:bg-orange-400/70";
+    // Orange zone (medium expenses) - 0.4 to 0.65
+    if (intensity < 0.5) return "bg-orange-400/50 hover:bg-orange-400/60";
     if (intensity < 0.65) return "bg-orange-500/60 hover:bg-orange-500/70";
     
-    // Оранжевый - 0.65 to 0.8
-    if (intensity < 0.7) return "bg-orange-500/70 hover:bg-orange-500/80";
+    // Orange to red transition - 0.65 to 0.8
     if (intensity < 0.75) return "bg-orange-600/70 hover:bg-orange-600/80";
-    if (intensity < 0.8) return "bg-orange-600/80 hover:bg-orange-600/90";
+    if (intensity < 0.85) return "bg-red-500/60 hover:bg-red-500/70";
     
-    // Красно-оранжевый к красному - 0.8 to 1.0
-    if (intensity < 0.85) return "bg-red-400/60 hover:bg-red-400/70";
-    if (intensity < 0.9) return "bg-red-500/60 hover:bg-red-500/70";
-    if (intensity < 0.95) return "bg-red-500/65 hover:bg-red-500/75";
-    
-    // Максимальные расходы
+    // Red zone (high expenses) - 0.85 to 1.0
     return "bg-red-500/70 hover:bg-red-500/80";
   };
 
@@ -251,14 +235,11 @@ const ExpenseCalendar = () => {
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <span>Низкие расходы</span>
             <div className="flex gap-1">
-              <div className="w-3 h-4 bg-green-600/50 rounded border border-border" />
-              <div className="w-3 h-4 bg-green-400/60 rounded border border-border" />
-              <div className="w-3 h-4 bg-lime-500/60 rounded border border-border" />
-              <div className="w-3 h-4 bg-yellow-500/70 rounded border border-border" />
-              <div className="w-3 h-4 bg-amber-500/60 rounded border border-border" />
-              <div className="w-3 h-4 bg-orange-500/70 rounded border border-border" />
-              <div className="w-3 h-4 bg-orange-600/80 rounded border border-border" />
-              <div className="w-3 h-4 bg-red-600/80 rounded border border-border" />
+              <div className="w-4 h-4 bg-green-500/50 rounded border border-border" />
+              <div className="w-4 h-4 bg-yellow-500/50 rounded border border-border" />
+              <div className="w-4 h-4 bg-orange-500/60 rounded border border-border" />
+              <div className="w-4 h-4 bg-orange-600/70 rounded border border-border" />
+              <div className="w-4 h-4 bg-red-500/70 rounded border border-border" />
             </div>
             <span>Высокие расходы</span>
           </div>
